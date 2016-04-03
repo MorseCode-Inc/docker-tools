@@ -29,7 +29,7 @@ unzip "otto-${OTTO_VER}.zip"
 mv otto "$USR_BIN"/
 
 wget -O vagrant_${VAGRANT_VER}.deb https://releases.hashicorp.com/vagrant/1.8.1/vagrant_${VAGRANT_VER}.deb
-apt install -y vagrant_${VAGRANT_VER}.deb
+dpkg -i vagrant_${VAGRANT_VER}.deb
 
 echo
 echo "otto"
