@@ -1,0 +1,102 @@
+#!/bin/bash
+
+## settings/configuration
+IMAGES="images"   # images directory
+DOCKER="docker"   # docker command/executable
+
+absdir() {
+  if [ ! -d "$1" ]
+  then
+    echo "DIR must be a directory: $1" >&2
+    exit
+  fi
+
+  cd "$1" >/dev/null 2>&1
+  pwd
+  cd - >/dev/null 2>&1
+}
+
+run() {
+  IMAGE="$1"
+  shift
+
+  if [ -z "$IMAGE" -o ! -d "$IMAGES/$IMAGE" ]
+  then
+    echo "Must specify docker image directory to build from."
+    echo
+    echo "Images:"
+    echo "------"
+    ls -c1 "$IMAGES"
+    exit
+  fi
+
+  if [ -z $(echo "$@") ]
+  then
+	  set -- /bin/bash
+  fi
+  
+  $SUDO "$DOCKER" run --name "$NAME" -p 80:80 -t $DAEMON "$IMAGE" "$@"
+}
+
+build() {
+  IMAGE="$1"
+
+  if [ -z "$IMAGE" -o ! -d "$IMAGES/$IMAGE" ]
+  then
+    echo "Must specify docker image directory to build from."
+    echo
+    echo "Images:"
+    echo "------"
+    ls -c1 "$IMAGES"
+    exit
+  fi
+
+  cd "$IMAGES/$IMAGE"
+  $SUDO "$DOCKER" build .
+
+}
+
+
+## main
+#######
+
+DIR=$(absdir "${0%/*}/..")
+cd "$DIR"
+
+MODE="$1"
+shift
+
+if [ "$(id -u)" != 0 ]
+then
+  SUDO="sudo"
+fi
+
+case "$MODE" in
+list)
+  "$DOCKER" images
+  ;;
+status)
+  $SUDO systemctl status docker
+  ;;
+stop)
+  $SUDO systemctl stop docker
+  ;;
+start)
+  $SUDO systemctl start docker
+  ;;
+build)
+  build "$@"
+  ;;
+run)
+  DAEMON="-d"
+  NAME="nginx"
+  run "$@"
+  ;;
+*)
+  echo "Expecting mode {run|build|list}" >&2
+  exit
+esac
+
+
+
+#exit
