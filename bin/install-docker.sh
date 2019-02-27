@@ -33,6 +33,9 @@ trusty)
 wily)
   echo "deb https://apt.dockerproject.org/repo ubuntu-wily main"
   ;;
+*)
+  echo "deb https://apt.dockerproject.org/repo ubuntu-$DISTRIB_CODENAME main"
+  ;;
 esac
 } >/tmp/docker.list
 
